@@ -1,0 +1,7 @@
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Любые пути вглубь текущей папки перенапрвляет на index.html
+# Нужно для SPA с роутером в mode: history
+RewriteRule . index.html [L,QSA]
