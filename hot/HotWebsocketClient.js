@@ -6,13 +6,19 @@ module.exports = class WebsocketClient extends BaseClient {
 
         this.client = new WebSocket(url.replace(/^http/, 'ws'));
         this.isOpen = false;
+        this.isStop = false;
 
         this.client.onopen = e => this._openHandler(e);
         this.client.onclose = e => this._closeHandler(e);
         this.client.onmessage = e => this._messageHandler(e);
         this.client.onerror = e => this._errorHandler(e);
 
-        this.earlyEvents = window.hotClient ? window.hotClient.events : {};
+        this.events = window.hotClient ? window.hotClient.events : {};
+
+        this._nativeOnOpen = null;
+        this._nativeOnClose = null;
+        this._nativeOnMessage = null;
+
         window.hotClient = this;
     }
 
@@ -20,36 +26,47 @@ module.exports = class WebsocketClient extends BaseClient {
         return require.resolve('./HotWebsocketClient');
     }
 
+    stop() {
+        this.isStop = true;
+        this.client.close();
+    }
+
+    start() {
+        this.isStop = false;
+        this._nativeOnClose && this._nativeOnClose();
+    }
+
     _openHandler(e) {
         this.isOpen = true;
         this.emit('open', e);
+        this._nativeOnOpen(e);
     }
 
     _closeHandler(e) {
         this.isOpen = false;
-        this.emit('close', e);
+        !this.isStop && this.emit('close', e);
+        !this.isStop && this._nativeOnClose(e);
     }
 
-    _messageHandler(e) {
-        this.emit('message', e.data);
+    _messageHandler({ data }) {
+        this.emit('message', data);
+        this._nativeOnMessage(data);
     }
 
     _errorHandler(e) {
         this.isOpen = false;
-        console.log('hotClient ERROR: ', e);
-
         this.emit('error', e);
     }
 
     onOpen(f) {
-        this.one('open', f);
+        this._nativeOnOpen = f;
     }
 
     onClose(f) {
-        this.one('close', f);
+        this._nativeOnClose = f;
     }
 
     onMessage(f) {
-        this.one('message', f);
+        this._nativeOnMessage = f;
     }
 };

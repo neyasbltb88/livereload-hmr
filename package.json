@@ -7,7 +7,7 @@
         "dev": "cross-env NODE_ENV=development webpack-dev-server",
         "build": "cross-env NODE_ENV=production webpack",
         "debug": "cross-env NODE_ENV=development DEBUG=true node --inspect-brk ./node_modules/webpack-dev-server/bin/webpack-dev-server.js --verbose",
-        "clear": "rm -r dist/scripts/*.js && rm stats.json"
+        "clear": "rm -r dist/ && rm stats.json"
     },
     "keywords": [],
     "author": "",

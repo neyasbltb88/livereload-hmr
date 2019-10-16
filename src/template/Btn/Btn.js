@@ -4,12 +4,15 @@ import './Btn.sass';
 export default class Btn {
     constructor(props = {}) {
         this.props = props;
-        // console.log('Btn props: ', props);
     }
 
     render() {
-        return <button className="live-reload-btn">LiveReload</button>;
-    }
+        let { onclick, color } = this.props;
 
-    //
+        return (
+            <button className="live-reload-btn" onclick={onclick} style={`--color: ${color}`}>
+                LiveReload
+            </button>
+        );
+    }
 }

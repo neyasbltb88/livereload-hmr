@@ -22,7 +22,6 @@ const hotOnly = clientConfig.hotOnly === true ? true : false;
 config = {
     mode: NODE_ENV,
     context: path.resolve(__dirname, 'src'),
-    target: 'web',
 
     entry: {
         index: './index'
@@ -43,12 +42,15 @@ config = {
         contentBase: path.join(__dirname, 'dist'),
         port,
         https,
-        hot,
-        hotOnly,
+        hot: NODE_ENV === 'development' ? hot : false,
+        hotOnly: NODE_ENV === 'development' ? hotOnly : false,
 
         writeToDisk: true,
 
-        // clientLogLevel: 'warn',
+        clientLogLevel: 'warn',
+        // clientLogLevel: 'error',
+        // clientLogLevel: 'info',
+        // clientLogLevel: 'trace',
         disableHostCheck: true,
         headers: {
             'Access-Control-Allow-Origin': '*',
@@ -69,7 +71,6 @@ config = {
     // devtool: NODE_ENV === 'development' ? 'eval-inline-source-map' : false,
     devtool: NODE_ENV === 'development' ? 'inline-source-map' : false,
     plugins: [
-        new webpack.HotModuleReplacementPlugin(),
         new webpack.DefinePlugin({
             NODE_ENV: JSON.stringify(NODE_ENV),
             DEBUG: JSON.stringify(DEBUG)
@@ -153,5 +154,9 @@ config = {
         extensions: ['index.js', '.js', '*']
     }
 };
+
+// if (NODE_ENV === 'production') {
+//     delete config.devServer;
+// }
 
 module.exports = config;

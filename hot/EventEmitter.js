@@ -23,8 +23,6 @@ module.exports = class EventEmitter {
     }
 
     emit(type, arg) {
-        // console.log('EventEmitter: ', type, arg);
-
         if (this.events[type]) {
             this.events[type].forEach(callback => callback(arg));
         }

@@ -1,7 +1,6 @@
 export default class EventEmitter {
     constructor() {
         this.events = {};
-        this.earlyEvents = {};
     }
 
     on(type, callback) {
@@ -26,10 +25,6 @@ export default class EventEmitter {
     emit(type, arg) {
         if (this.events[type]) {
             this.events[type].forEach(callback => callback(arg));
-        }
-
-        if (this.earlyEvents[type]) {
-            this.earlyEvents[type].forEach(callback => callback(arg));
         }
     }
 }
