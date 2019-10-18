@@ -23,7 +23,7 @@ export default class ClientController extends EventEmitter {
 
     getScripts() {
         if (window.hotClient.isOpen) {
-            this.emit('open', window.hotClient);
+            this.emit('ok', window.hotClient);
 
             return false;
         }
@@ -71,19 +71,25 @@ export default class ClientController extends EventEmitter {
 
     _loadScripts(urls) {
         let url = urls.shift();
-        return fetch(url)
-            .then(res => res.text())
-            .then(script => this._appendScript(script))
-            .then(() => {
-                this.emit('loaded', url);
+        return (
+            fetch(url)
+                .then(res => res.text())
+                .then(script => this._appendScript(script))
+                .then(() => {
+                    this.emit('loaded', url);
 
-                if (urls.length > 0) {
-                    return this._loadScripts(urls);
-                } else {
-                    return true;
-                }
-            })
-            .catch(() => this.emit('warning', url));
+                    if (urls.length > 0) {
+                        return this._loadScripts(urls);
+                    } else {
+                        return true;
+                    }
+                })
+                // .catch(() => this.emit('warning', url));
+                .catch(err => {
+                    console.log('catch', err);
+                    // debugger;
+                })
+        );
     }
 
     _appendScript(script) {
@@ -97,7 +103,6 @@ export default class ClientController extends EventEmitter {
     _messageAnalyze(msg) {
         try {
             msg = JSON.parse(msg);
-            // console.log('_messageAnalyze: ', msg);
 
             if (msg.type) this.emit(msg.type, msg.data);
         } catch (err) {}
@@ -108,7 +113,10 @@ export default class ClientController extends EventEmitter {
             window.hotClient = new EventEmitter();
         }
 
-        window.hotClient.one('open', () => this.emit('open', window.hotClient));
+        window.hotClient.one('open', () => {
+            this.emit('open', window.hotClient);
+            this.emit('ok', window.hotClient);
+        });
         window.hotClient.one('close', () => this.emit('close', window.hotClient));
         window.hotClient.one('message', msg => this._messageAnalyze(msg));
         window.hotClient.one('error', e => this.emit('error', e));

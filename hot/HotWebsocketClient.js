@@ -44,8 +44,10 @@ module.exports = class WebsocketClient extends BaseClient {
 
     _closeHandler(e) {
         this.isOpen = false;
-        !this.isStop && this.emit('close', e);
-        !this.isStop && this._nativeOnClose(e);
+        if (!this.isStop) {
+            this.emit('close', e);
+            this._nativeOnClose(e);
+        }
     }
 
     _messageHandler({ data }) {

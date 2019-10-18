@@ -16,46 +16,56 @@ export default class Template {
         this.clientController = new ClientController(this.publicPath);
         window.clientController = this.clientController;
 
-        this.clientController.on('loaded', url => this.log('default', '*ScriptsAutoload* Загружен на страницу:', url));
-        this.clientController.on('invalid', () => {
-            if (clientConfig.displayAwait) {
-                this.setState({
-                    connectStatus: 'await'
-                });
-            }
+        // Состояние
+        this.state = {
+            connectStatus: 'ready',
+            wasInit: false,
+            isConnected: false,
+            notLoaded: new Set()
+        };
+
+        // Событие успешной подгрузки ресурса с локального сервера
+        this.clientController.on('loaded', url => {
+            this.log('default', '*ScriptsAutoload* Загружен на страницу:', url);
+            let { notLoaded } = this.state;
+            notLoaded.delete(url);
+            this.setState({ notLoaded });
         });
 
+        // Событие соединения сокета с локальным сервером
+        this.clientController.on('open', () => {
+            this.log('success', '*ScriptsAutoload* Подключен к серверу:', this.publicPath);
+        });
+
+        // Событие изменения файла проекта(происходит во время перекомпиляции модуля)
+        this.clientController.on('invalid', () => {
+            if (clientConfig.displayAwait) this.setState({ connectStatus: 'await' });
+        });
+
+        // Событие завершения компиляции, так же вызывается после события 'open'
         this.clientController.on('ok', () => {
             this.setState({
-                connectStatus: 'init'
+                connectStatus: 'init',
+                wasInit: true,
+                isConnected: true
             });
         });
 
-        this.clientController.on('open', e => {
-            if (!this.state.isConnected) {
-                this.log('success', '*ScriptsAutoload* Подключен к серверу:', this.publicPath);
-                this.setState({
-                    connectStatus: 'init',
-                    isInit: true,
-                    isConnected: true
-                });
-            }
+        // Событие начала подгрузки ресурсов с локального сервера
+        this.clientController.on('await', () => {
+            this.setState({ connectStatus: 'await' });
         });
 
-        this.clientController.on('await', e => {
-            this.setState({
-                connectStatus: 'await'
-            });
-        });
-
+        // Событие ошибки загрузки ресурса с локального сервера
         this.clientController.on('warning', e => {
-            this.log('warning', '*ScriptsAutoload* Ошибка загрузки скрипта:', e);
-            this.setState({
-                connectStatus: 'warning'
-            });
+            this.log('warning', '*ScriptsAutoload* Ошибка загрузки ресурса:', e);
+            let { notLoaded } = this.state;
+            notLoaded.add(e);
+            this.setState({ notLoaded });
         });
 
-        this.clientController.on('close', e => {
+        // Событие отключения сокета от локального сервера
+        this.clientController.on('close', () => {
             this.log('error', '*ScriptsAutoload* Закрыто соединение с сервером:', this.publicPath);
             this.setState({
                 connectStatus: 'error',
@@ -63,47 +73,36 @@ export default class Template {
             });
         });
 
-        this.state = {
-            connectStatus: 'notInit',
-            isInit: false,
-            isConnected: false
-        };
-
+        // Объект, описывающий вид/поведение для определенных состояний
         this.status = {
-            notInit: {
-                handler: e => {
-                    this.setState({
-                        connectStatus: 'await'
-                    });
+            ready: {
+                handler: () => {
+                    this.setState({ connectStatus: 'await' });
                     this.clientController.start();
                 },
-                color: '#C3CFE0'
+                color: '#C3CFE0',
+                title: `Подключиться к серверу ${this.publicPath}`
             },
             init: {
-                handler: e => {
-                    this.setState({
-                        connectStatus: 'notInit'
-                    });
+                handler: () => {
+                    this.setState({ connectStatus: 'ready' });
                     this.clientController.stop();
                 },
-                color: '#85D035'
+                color: '#85D035',
+                title: `Отключиться от сервера ${this.publicPath}`
             },
             await: {
-                handler: e => console.log('Click await'),
-                color: '#FFC000'
+                handler: () => {},
+                color: '#FFC000',
+                title: 'Ожидание ресурса'
             },
             error: {
-                handler: e => {
-                    this.setState({
-                        connectStatus: 'await'
-                    });
+                handler: () => {
+                    this.setState({ connectStatus: 'await' });
                     this.clientController.start();
                 },
-                color: '#F92672'
-            },
-            warning: {
-                handler: e => console.log('Click warning'),
-                color: '#FD971F'
+                color: '#F92672',
+                title: 'Отключен от сервера ' + this.publicPath
             }
         };
     }
@@ -119,7 +118,7 @@ export default class Template {
             ...newState
         };
 
-        if ((this.state.connectStatus === 'error' || this.state.connectStatus === 'await') && !this.state.isInit) {
+        if (!this.state.wasInit && (this.state.connectStatus === 'error' || this.state.connectStatus === 'await')) {
             return;
         }
 
@@ -137,12 +136,20 @@ export default class Template {
     }
 
     render() {
-        let { connectStatus } = this.state;
-        let { handler, color } = this.status[connectStatus];
+        let { connectStatus, notLoaded } = this.state;
+        let { handler, color, title } = this.status[connectStatus];
+
+        // Если есть ошибки загрузки ресурсов
+        if (notLoaded.size > 0) {
+            let notLoadedList = '';
+            notLoaded.forEach(err => (notLoadedList += '\n' + err));
+            title = `Ошибка загрузки: ${notLoadedList}`;
+            color = '#FD971F';
+        }
 
         return (
             <div id={this.id}>
-                <Btn color={color} onclick={handler} />
+                <Btn title={title} color={color} onclick={handler} />
             </div>
         );
     }

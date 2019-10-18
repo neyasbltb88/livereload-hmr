@@ -7,10 +7,10 @@ export default class Btn {
     }
 
     render() {
-        let { onclick, color } = this.props;
+        let { title, onclick, color } = this.props;
 
         return (
-            <button className="live-reload-btn" onclick={onclick} style={`--color: ${color}`}>
+            <button className="live-reload-btn" title={title} onclick={onclick} style={`--color: ${color}`}>
                 LiveReload
             </button>
         );
