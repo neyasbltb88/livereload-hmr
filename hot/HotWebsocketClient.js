@@ -1,4 +1,4 @@
-const BaseClient = require('./client-src/clients/BaseClient');
+const BaseClient = require('./BaseClient');
 
 module.exports = class WebsocketClient extends BaseClient {
     constructor(url) {

@@ -44,7 +44,8 @@ export default class ClientController extends EventEmitter {
                 let scripts = doc.querySelectorAll('script');
                 scripts.forEach(script => urls.push(this._normalizeSrc(script.getAttribute('src'))));
                 return urls;
-            });
+            })
+            .catch(() => this.emit('close'));
     }
 
     // Приводит src скриптов к абсолютному виду
@@ -71,25 +72,19 @@ export default class ClientController extends EventEmitter {
 
     _loadScripts(urls) {
         let url = urls.shift();
-        return (
-            fetch(url)
-                .then(res => res.text())
-                .then(script => this._appendScript(script))
-                .then(() => {
-                    this.emit('loaded', url);
+        return fetch(url)
+            .then(res => res.text())
+            .then(script => this._appendScript(script))
+            .then(() => {
+                this.emit('loaded', url);
 
-                    if (urls.length > 0) {
-                        return this._loadScripts(urls);
-                    } else {
-                        return true;
-                    }
-                })
-                // .catch(() => this.emit('warning', url));
-                .catch(err => {
-                    console.log('catch', err);
-                    // debugger;
-                })
-        );
+                if (urls.length > 0) {
+                    return this._loadScripts(urls);
+                } else {
+                    return true;
+                }
+            })
+            .catch(() => this.emit('warning', url));
     }
 
     _appendScript(script) {

@@ -1,5 +1,5 @@
 'use strict';
-const EventEmitter = require('../../EventEmitter');
+const EventEmitter = require('./EventEmitter');
 
 /* eslint-disable
   no-unused-vars
