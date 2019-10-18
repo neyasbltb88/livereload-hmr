@@ -108,7 +108,7 @@ export default class Template {
     }
 
     tryConnect() {
-        this.clientController.getScripts();
+        this.clientController.getResources();
     }
 
     setState(newState = {}) {

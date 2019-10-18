@@ -21,7 +21,7 @@ export default class ClientController extends EventEmitter {
         }
     }
 
-    getScripts() {
+    getResources() {
         if (window.hotClient.isOpen) {
             this.emit('ok', window.hotClient);
 
@@ -29,20 +29,37 @@ export default class ClientController extends EventEmitter {
         }
 
         this.emit('await');
-        this._fetchScriptsUrl()
-            .then(urls => this._loadScripts(urls))
+        this._fetchResourcesUrl()
+            .then(urls => this._loadResources(urls))
             .catch(() => {});
     }
 
-    _fetchScriptsUrl() {
+    _fetchResourcesUrl() {
         return fetch(this.publicPath)
             .then(res => res.text())
             .then(page => {
                 let urls = [];
                 let parser = new DOMParser();
                 let doc = parser.parseFromString(page, 'text/html');
-                let scripts = doc.querySelectorAll('script');
-                scripts.forEach(script => urls.push(this._normalizeSrc(script.getAttribute('src'))));
+                let scripts = doc.querySelectorAll('script:not(.ignore)');
+                scripts.forEach(script => {
+                    let scriptResource = {
+                        type: 'script',
+                        url: this._normalizeSrc(script.getAttribute('src'))
+                    };
+
+                    urls.push(scriptResource);
+                });
+
+                let styles = doc.querySelectorAll('link[rel="stylesheet"]:not(.ignore)');
+                styles.forEach(style => {
+                    let styleResource = {
+                        type: 'style',
+                        url: this._normalizeSrc(style.getAttribute('href'))
+                    };
+
+                    urls.push(styleResource);
+                });
                 return urls;
             })
             .catch(() => this.emit('close'));
@@ -70,26 +87,31 @@ export default class ClientController extends EventEmitter {
         return result;
     }
 
-    _loadScripts(urls) {
-        let url = urls.shift();
+    _loadResources(urls) {
+        let { type, url } = urls.shift();
         return fetch(url)
-            .then(res => res.text())
-            .then(script => this._appendScript(script))
-            .then(() => {
-                this.emit('loaded', url);
+            .then(res => {
+                if (res.status !== 200) {
+                    throw new Error(`${url} status: ${res.status}`);
+                }
 
+                res.text();
+            })
+            .then(content => this._appendResource(type, content))
+            .then(() => this.emit('loaded', url))
+            .catch(() => this.emit('warning', url))
+            .finally(() => {
                 if (urls.length > 0) {
-                    return this._loadScripts(urls);
+                    return this._loadResources(urls);
                 } else {
                     return true;
                 }
-            })
-            .catch(() => this.emit('warning', url));
+            });
     }
 
-    _appendScript(script) {
-        // let scriptEl = document.createElement('script');
-        // scriptEl.textContent = script;
+    _appendResource(type, content) {
+        // let scriptEl = document.createElement(type);
+        // scriptEl.textContent = content;
         // document.head.appendChild(scriptEl);
 
         return true;
