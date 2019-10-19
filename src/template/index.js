@@ -20,6 +20,7 @@ export default class Template {
         this.state = {
             connectStatus: 'ready',
             wasInit: false,
+            wasConnected: false,
             isConnected: false,
             notLoaded: new Set()
         };
@@ -47,13 +48,18 @@ export default class Template {
             this.setState({
                 connectStatus: 'init',
                 wasInit: true,
+                wasConnected: true,
                 isConnected: true
             });
         });
 
         // Событие начала подгрузки ресурсов с локального сервера
         this.clientController.on('await', () => {
-            this.setState({ connectStatus: 'await' });
+            let newState = { connectStatus: 'await' };
+
+            if (!this.state.wasInit) newState.connectStatus = 'ready';
+
+            this.setState(newState);
         });
 
         // Событие ошибки загрузки ресурса с локального сервера
@@ -67,18 +73,28 @@ export default class Template {
         // Событие отключения сокета от локального сервера
         this.clientController.on('close', () => {
             this.log('error', '*ScriptsAutoload* Закрыто соединение с сервером:', this.publicPath);
-            this.setState({
-                connectStatus: 'error',
-                isConnected: false
-            });
+            let newState = {
+                isConnected: false,
+                connectStatus: 'error'
+            };
+
+            if (!this.state.wasInit) newState.connectStatus = 'ready';
+
+            this.setState(newState);
         });
 
         // Объект, описывающий вид/поведение для определенных состояний
         this.status = {
             ready: {
                 handler: () => {
-                    this.setState({ connectStatus: 'await' });
-                    this.clientController.start();
+                    this.setState({ connectStatus: 'await', wasInit: true });
+                    // Если было инициализировано соединение с сокетом, значит можно его запускать
+                    if (this.state.wasConnected) {
+                        this.clientController.start();
+                        // Если не было инициализировано, значит не получен основной скрипт с локального сервера и надо повторить попытку
+                    } else {
+                        this.tryConnect();
+                    }
                 },
                 color: '#C3CFE0',
                 title: `Подключиться к серверу ${this.publicPath}`
@@ -98,8 +114,14 @@ export default class Template {
             },
             error: {
                 handler: () => {
-                    this.setState({ connectStatus: 'await' });
-                    this.clientController.start();
+                    this.setState({ connectStatus: 'await', wasInit: true });
+                    // Если было инициализировано соединение с сокетом, значит можно его запускать
+                    if (this.state.wasConnected) {
+                        this.clientController.start();
+                        // Если не было инициализировано, значит не получен основной скрипт с локального сервера и надо повторить попытку
+                    } else {
+                        this.tryConnect();
+                    }
                 },
                 color: '#F92672',
                 title: 'Отключен от сервера ' + this.publicPath
@@ -117,10 +139,6 @@ export default class Template {
             ...oldState,
             ...newState
         };
-
-        if (!this.state.wasInit && (this.state.connectStatus === 'error' || this.state.connectStatus === 'await')) {
-            return;
-        }
 
         this.mount();
     }
