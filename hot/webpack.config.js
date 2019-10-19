@@ -1,17 +1,12 @@
-const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-// const CopyPlugin = require('copy-webpack-plugin');
 
 const CustomHotUpdateStrategy = require('webpack-custom-hot-update-strategy');
 const updateFetchEval = require('webpack-custom-hot-update-strategy/strategies/update/hotDownloadUpdateChunkFetchEval');
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const DEBUG = process.env.DEBUG && process.env.DEBUG === 'true' ? true : false;
-const CLIENT = process.env.CLIENT && process.env.CLIENT === 'true' ? true : false;
 
-const clientConfig = require('./client.config');
+const clientConfig = require('../client.config');
 const https = clientConfig.https === true ? true : false;
 const host = clientConfig.host ? clientConfig.host : 'localhost';
 const port = clientConfig.port ? clientConfig.port : 3000;
@@ -21,15 +16,15 @@ const hotOnly = clientConfig.hotOnly === true ? true : false;
 
 config = {
     mode: NODE_ENV,
-    context: path.resolve(__dirname, 'src'),
+    context: path.resolve(__dirname, 'autoload-client-src'),
 
     entry: {
-        index: './scripts/index'
+        index: './index'
     },
 
     output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: '[name].js',
+        path: path.resolve(__dirname),
+        filename: 'AutoloadClient.js',
         publicPath
     },
 
@@ -39,7 +34,7 @@ config = {
     },
 
     devServer: {
-        contentBase: path.join(__dirname, 'dist'),
+        contentBase: path.join(__dirname),
         port,
         https,
         hot: NODE_ENV === 'development' ? hot : false,
@@ -60,21 +55,15 @@ config = {
         },
         index: '',
         transportMode: {
-            client: require.resolve('./hot/HotWebsocketClient'),
+            client: require.resolve('./HotWebsocketClient'),
             server: 'ws'
         }
     },
 
-    // devtool: NODE_ENV === 'development' ? 'eval-inline-source-map' : false,
     devtool: NODE_ENV === 'development' ? 'inline-source-map' : false,
     plugins: [
-        new webpack.DefinePlugin({
-            NODE_ENV: JSON.stringify(NODE_ENV),
-            DEBUG: JSON.stringify(DEBUG)
-        }),
         new HtmlWebpackPlugin({
-            title: 'JSX Test',
-            template: './index.html'
+            template: path.resolve(__dirname, 'autoload-client-src/index.html')
         }),
         new CustomHotUpdateStrategy({
             update: updateFetchEval
@@ -136,12 +125,11 @@ config = {
     },
 
     resolve: {
-        extensions: ['index.js', '.js', '*']
+        extensions: ['index.js', '.js', '*'],
+        alias: {
+            '@': path.resolve(__dirname, '../')
+        }
     }
 };
-
-if (CLIENT) {
-    config = require('./hot/webpack.config');
-}
 
 module.exports = config;

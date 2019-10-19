@@ -35,7 +35,7 @@ export default class ClientController extends EventEmitter {
     }
 
     _fetchResourcesUrl() {
-        return fetch(this.publicPath)
+        return fetch(this.publicPath + 'index.html')
             .then(res => res.text())
             .then(page => {
                 let urls = [];
@@ -95,7 +95,7 @@ export default class ClientController extends EventEmitter {
                     throw new Error(`${url} status: ${res.status}`);
                 }
 
-                res.text();
+                return res.text();
             })
             .then(content => this._appendResource(type, content))
             .then(() => this.emit('loaded', url))
@@ -110,9 +110,9 @@ export default class ClientController extends EventEmitter {
     }
 
     _appendResource(type, content) {
-        // let scriptEl = document.createElement(type);
-        // scriptEl.textContent = content;
-        // document.head.appendChild(scriptEl);
+        let scriptEl = document.createElement(type);
+        scriptEl.textContent = content;
+        document.head.appendChild(scriptEl);
 
         return true;
     }

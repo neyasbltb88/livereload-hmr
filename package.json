@@ -6,7 +6,8 @@
     "scripts": {
         "dev": "cross-env NODE_ENV=development webpack-dev-server",
         "build": "cross-env NODE_ENV=production webpack",
-        "debug": "cross-env NODE_ENV=development DEBUG=true node --inspect-brk ./node_modules/webpack-dev-server/bin/webpack-dev-server.js --verbose",
+        "dev:client": "cross-env NODE_ENV=development CLIENT=true webpack-dev-server",
+        "build:client": "cross-env NODE_ENV=production CLIENT=true webpack",
         "clear": "rm -r dist/ && rm stats.json"
     },
     "keywords": [],

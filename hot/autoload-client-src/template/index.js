@@ -1,5 +1,5 @@
 import dom from './dom';
-import clientConfig from '../../client.config';
+import clientConfig from '@/client.config';
 import ClientController from '../ClientController';
 import Log from '../services/log';
 import Btn from './Btn';

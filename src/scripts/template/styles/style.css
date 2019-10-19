@@ -1,0 +1,16 @@
+body {
+    margin: 0;
+    background-color: #888;
+}
+
+.header-container {
+    position: fixed;
+    padding: 10px;
+    width: 100%;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, .5);
+    color: #fff;
+    font-family: sans-serif;
+    text-align: center;
+    z-index: 999;
+}
