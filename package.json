@@ -7,7 +7,7 @@
         "dev": "cross-env NODE_ENV=development webpack-dev-server",
         "build": "cross-env NODE_ENV=production webpack",
         "dev:client": "cross-env NODE_ENV=development webpack-dev-server --config hot/webpack.config.js",
-        "build:client": "cross-env NODE_ENV=production webpack --config hot/webpack.config.js",
+        "build:client": "cross-env NODE_ENV=production webpack --config hot/webpack.config.js && rm index.html",
         "clear": "rm -r dist/ && rm stats.json"
     },
     "keywords": [],
