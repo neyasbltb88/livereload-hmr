@@ -2,6 +2,7 @@ import dom from './dom';
 import clientConfig from '@/client.config';
 import ClientController from '../ClientController';
 import Log from '../services/log';
+import throttle from '../services/throttle';
 import Btn from './Btn';
 
 import './index.sass';
@@ -16,13 +17,24 @@ export default class Template {
         this.clientController = new ClientController(this.publicPath);
         window.clientController = this.clientController;
 
+        this.moveHandler = throttle(this.moveHandler, 5);
+
+        let position = this.getPosition();
+
         // Состояние
         this.state = {
             connectStatus: 'ready',
             wasInit: false,
             wasConnected: false,
             isConnected: false,
-            notLoaded: new Set()
+            dragMode: false,
+            position,
+            offset: {
+                x: 0,
+                y: 0
+            },
+            notLoaded: new Set(),
+            dragModeTimeout: 150
         };
 
         // Событие успешной подгрузки ресурса с локального сервера
@@ -129,6 +141,7 @@ export default class Template {
         };
     }
 
+    // Метод, дающий команду контроллеру на получение рабочих скриптов с локального сервера
     tryConnect() {
         this.clientController.getResources();
     }
@@ -143,6 +156,79 @@ export default class Template {
         this.mount();
     }
 
+    // Получает сохраненную позицию кнопки
+    getPosition() {
+        let position = { x: 0, y: 0 };
+
+        try {
+            let restore = window.localStorage.getItem('livereloadHMR');
+            position = JSON.parse(restore).position;
+        } catch (err) {}
+
+        return position;
+    }
+
+    // Сохраняет позицию кнопки
+    setPosition(position) {
+        window.localStorage.setItem('livereloadHMR', JSON.stringify({ position }));
+    }
+
+    // Обработчик перемещения кнопки
+    moveHandler = ({ clientX, clientY }) => {
+        let { offset, size } = this.state;
+        // Чтобы кнопка не выходила за верхний и левый края экрана
+        let x = clientX - offset.x >= 0 ? clientX - offset.x : 0;
+        let y = clientY - offset.y >= 0 ? clientY - offset.y : 0;
+
+        // Чтобы кнопка не выходила за нижний и правый края экрана
+        x = x + size.x <= window.innerWidth ? x : window.innerWidth - size.x;
+        y = y + size.y <= window.innerHeight ? y : window.innerHeight - size.y;
+
+        this.setState({
+            position: { x, y }
+        });
+    };
+
+    // Обработчик переключения режима перемещения кнопки
+    dragHandler = ({ offsetX, offsetY, currentTarget }) => {
+        // Размеры кнопки нужны для расчетов ограничения вытаскивания кнопки за экран
+        let style = getComputedStyle(currentTarget);
+        let size = {
+            x: parseInt(style.width),
+            y: parseInt(style.height)
+        };
+        // Положение мышки внутри кнопки на момент клика
+        let offset = {
+            x: offsetX,
+            y: offsetY
+        };
+
+        // Если мышка зажата так долго, чтобы выполнился этот таймаут, кнопка переходит в режим перемещения за мышкой
+        let timeout = setTimeout(() => {
+            this.setState({
+                dragMode: true,
+                offset,
+                size
+            });
+            document.addEventListener('mousemove', this.moveHandler);
+        }, this.state.dragModeTimeout);
+
+        // Когда кнопка мышки отжимается, сбрасываем таймаут, чтобы сработал простой клик,
+        // отменяем режим перемещения и фиксируем координаты кнопки
+        document.addEventListener(
+            'mouseup',
+            () => {
+                requestAnimationFrame(() => {
+                    clearTimeout(timeout);
+                    this.setState({ dragMode: false });
+                    document.removeEventListener('mousemove', this.moveHandler);
+                    this.setPosition(this.state.position);
+                });
+            },
+            { once: true }
+        );
+    };
+
     mount(target = this.target) {
         this.target = target;
         let template = target.querySelector('#' + this.id);
@@ -154,7 +240,7 @@ export default class Template {
     }
 
     render() {
-        let { connectStatus, notLoaded } = this.state;
+        let { connectStatus, notLoaded, position, dragMode } = this.state;
         let { handler, color, title } = this.status[connectStatus];
 
         // Если есть ошибки загрузки ресурсов
@@ -165,9 +251,15 @@ export default class Template {
             color = '#FD971F';
         }
 
+        let style = `--x: ${position.x}px; --y: ${position.y}px;`;
+
+        if (dragMode) {
+            handler = () => {};
+        }
+
         return (
-            <div id={this.id}>
-                <Btn title={title} color={color} onclick={handler} />
+            <div id={this.id} onmousedown={this.dragHandler} style={style}>
+                <Btn title={title} color={color} onclick={handler} dragMode={dragMode} />
             </div>
         );
     }

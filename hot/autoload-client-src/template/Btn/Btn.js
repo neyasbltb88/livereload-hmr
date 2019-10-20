@@ -6,10 +6,14 @@ export default class Btn {
     }
 
     render() {
-        let { title, onclick, color } = this.props;
+        let { title, onclick, color, dragMode } = this.props;
+        let style = `--color: ${color}; `;
+        if (dragMode) {
+            style += 'cursor: move; opacity: 0.5; background-color: rgba(0, 0, 0, .7)';
+        }
 
         return (
-            <button className="livereload-HMR-btn" title={title} onclick={onclick} style={`--color: ${color}`}>
+            <button className="livereload-HMR-btn" title={title} onclick={onclick} style={style}>
                 LiveReload
             </button>
         );
