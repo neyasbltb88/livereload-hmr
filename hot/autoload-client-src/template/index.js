@@ -19,6 +19,13 @@ export default class Template {
 
         let position = this.getPosition();
         let dragTimeout = clientConfig.dragTimeout !== undefined ? clientConfig.dragTimeout : 150;
+        let colors = {
+            ready: '#C3CFE0',
+            init: '#85D035',
+            await: '#FFC000',
+            error: '#F92672',
+            ...clientConfig.colors
+        };
 
         // Состояние
         this.state = {
@@ -107,7 +114,7 @@ export default class Template {
                         this.tryConnect();
                     }
                 },
-                color: '#C3CFE0',
+                color: colors.ready,
                 title: `Подключиться к серверу ${this.publicPath}`
             },
             init: {
@@ -115,12 +122,12 @@ export default class Template {
                     this.setState({ connectStatus: 'ready' });
                     this.clientController.stop();
                 },
-                color: '#85D035',
+                color: colors.init,
                 title: `Отключиться от сервера ${this.publicPath}`
             },
             await: {
                 handler: () => {},
-                color: '#FFC000',
+                color: colors.await,
                 title: 'Ожидание ресурса'
             },
             error: {
@@ -134,7 +141,7 @@ export default class Template {
                         this.tryConnect();
                     }
                 },
-                color: '#F92672',
+                color: colors.error,
                 title: 'Отключен от сервера ' + this.publicPath
             }
         };
