@@ -23,8 +23,8 @@ config = {
     },
 
     output: {
-        path: path.resolve(__dirname),
-        filename: 'AutoloadClient.js',
+        path: path.resolve(__dirname, NODE_ENV === 'development' ? '' : '../'),
+        filename: 'Client.js',
         publicPath
     },
 

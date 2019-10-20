@@ -1,15 +1,11 @@
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-// const CopyPlugin = require('copy-webpack-plugin');
 
 const CustomHotUpdateStrategy = require('webpack-custom-hot-update-strategy');
 const updateFetchEval = require('webpack-custom-hot-update-strategy/strategies/update/hotDownloadUpdateChunkFetchEval');
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const DEBUG = process.env.DEBUG && process.env.DEBUG === 'true' ? true : false;
-const CLIENT = process.env.CLIENT && process.env.CLIENT === 'true' ? true : false;
 
 const clientConfig = require('./client.config');
 const https = clientConfig.https === true ? true : false;
@@ -69,8 +65,7 @@ config = {
     devtool: NODE_ENV === 'development' ? 'inline-source-map' : false,
     plugins: [
         new webpack.DefinePlugin({
-            NODE_ENV: JSON.stringify(NODE_ENV),
-            DEBUG: JSON.stringify(DEBUG)
+            NODE_ENV: JSON.stringify(NODE_ENV)
         }),
         new HtmlWebpackPlugin({
             title: 'JSX Test',
@@ -139,9 +134,5 @@ config = {
         extensions: ['index.js', '.js', '*']
     }
 };
-
-if (CLIENT) {
-    config = require('./hot/webpack.config');
-}
 
 module.exports = config;

@@ -15,11 +15,10 @@ export default class Template {
         this.publicPath = `${clientConfig.https ? 'https' : 'http'}://${clientConfig.host}:${clientConfig.port}/`;
 
         this.clientController = new ClientController(this.publicPath);
-        window.clientController = this.clientController;
-
         this.moveHandler = throttle(this.moveHandler, 5);
 
         let position = this.getPosition();
+        let dragTimeout = clientConfig.dragTimeout !== undefined ? clientConfig.dragTimeout : 150;
 
         // Состояние
         this.state = {
@@ -34,7 +33,7 @@ export default class Template {
                 y: 0
             },
             notLoaded: new Set(),
-            dragModeTimeout: 150
+            dragTimeout
         };
 
         // Событие успешной подгрузки ресурса с локального сервера
@@ -211,7 +210,7 @@ export default class Template {
                 size
             });
             document.addEventListener('mousemove', this.moveHandler);
-        }, this.state.dragModeTimeout);
+        }, this.state.dragTimeout);
 
         // Когда кнопка мышки отжимается, сбрасываем таймаут, чтобы сработал простой клик,
         // отменяем режим перемещения и фиксируем координаты кнопки

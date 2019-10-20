@@ -4,5 +4,6 @@ module.exports = {
     https: true,
     hot: true,
     hotOnly: true,
-    displayAwait: true
+    displayAwait: true,
+    dragTimeout: 150
 };
