@@ -10,6 +10,7 @@ module.exports = {
         ready: '#C3CFE0',
         init: '#85D035',
         await: '#FFC000',
+        warning: '#FD971F',
         error: '#F92672'
     }
 };

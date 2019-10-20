@@ -23,6 +23,7 @@ export default class Template {
             ready: '#C3CFE0',
             init: '#85D035',
             await: '#FFC000',
+            warning: '#FD971F',
             error: '#F92672',
             ...clientConfig.colors
         };
@@ -254,7 +255,7 @@ export default class Template {
             let notLoadedList = '';
             notLoaded.forEach(err => (notLoadedList += '\n' + err));
             title = `Ошибка загрузки: ${notLoadedList}`;
-            color = '#FD971F';
+            color = colors.warning;
         }
 
         let style = `--x: ${position.x}px; --y: ${position.y}px;`;
