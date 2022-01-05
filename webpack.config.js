@@ -6,14 +6,10 @@ const CustomHotUpdateStrategy = require('webpack-custom-hot-update-strategy');
 const updateFetchEval = require('webpack-custom-hot-update-strategy/strategies/update/hotDownloadUpdateChunkFetchEval');
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
+const DEV = NODE_ENV === 'development';
 
-const clientConfig = require('./client.config');
-const https = clientConfig.https === true ? true : false;
-const host = clientConfig.host ? clientConfig.host : 'localhost';
-const port = clientConfig.port ? clientConfig.port : 3000;
-const publicPath = `${https ? 'https' : 'http'}://${host}:${port}/`;
-const hot = clientConfig.hot === true ? true : false;
-const hotOnly = clientConfig.hotOnly === true ? true : false;
+const { publicPath } = require('./base.config.js');
+const devServerConfig = require('./dev-server.config.js');
 
 config = {
     mode: NODE_ENV,
@@ -29,40 +25,15 @@ config = {
         publicPath
     },
 
-    watch: NODE_ENV === 'development',
+    watch: DEV,
     watchOptions: {
         aggregateTimeout: 100
     },
 
-    devServer: {
-        contentBase: path.join(__dirname, 'dist'),
-        port,
-        https,
-        hot: NODE_ENV === 'development' ? hot : false,
-        hotOnly: NODE_ENV === 'development' ? hotOnly : false,
+    devServer: devServerConfig,
 
-        writeToDisk: false,
-
-        clientLogLevel: 'warn',
-        disableHostCheck: true,
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-            'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
-        },
-        overlay: {
-            warnings: true,
-            errors: true
-        },
-        index: '',
-        transportMode: {
-            client: require.resolve('./hot/HotWebsocketClient'),
-            server: 'ws'
-        }
-    },
-
-    // devtool: NODE_ENV === 'development' ? 'eval-inline-source-map' : false,
-    devtool: NODE_ENV === 'development' ? 'inline-source-map' : false,
+    // devtool: DEV ? 'eval-inline-source-map' : false,
+    devtool: DEV ? 'inline-source-map' : false,
     plugins: [
         new webpack.DefinePlugin({
             NODE_ENV: JSON.stringify(NODE_ENV)
