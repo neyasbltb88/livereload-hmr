@@ -57,6 +57,7 @@ config = {
                     options: {
                         presets: ['@babel/preset-env'],
                         plugins: [
+                            '@babel/plugin-proposal-optional-chaining',
                             '@babel/plugin-proposal-class-properties',
                             '@babel/plugin-syntax-jsx',
                             ['@babel/plugin-transform-react-jsx', { 'pragma': 'dom' }]
@@ -102,7 +103,10 @@ config = {
     },
 
     resolve: {
-        extensions: ['index.js', '.js', '*']
+        extensions: ['index.js', '.js', '.jsx', '*'],
+        alias: {
+            '@utils': path.resolve(__dirname, './src/scripts/utils')
+        }
     }
 };
 
