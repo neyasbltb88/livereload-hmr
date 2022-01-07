@@ -50,12 +50,12 @@ config = {
     module: {
         rules: [
             {
-                test: /\.js$|\.jsx$/,
+                test: /\.js$|\.jsx$|\.ts$|\.tsx$/,
                 exclude: /node_modules/,
                 use: {
                     loader: 'babel-loader',
                     options: {
-                        presets: ['@babel/preset-env'],
+                        presets: ['@babel/preset-typescript', '@babel/preset-env'],
                         plugins: [
                             '@babel/plugin-proposal-optional-chaining',
                             '@babel/plugin-proposal-class-properties',
@@ -103,7 +103,7 @@ config = {
     },
 
     resolve: {
-        extensions: ['index.js', '.js', '.jsx', '*'],
+        extensions: ['index.js', '.js', '.jsx', '.ts', '.tsx', '*'],
         alias: {
             '@utils': path.resolve(__dirname, './src/scripts/utils')
         }
