@@ -1,5 +1,4 @@
-import dom from './dom';
-
+import { dom } from '@utils';
 import './styles/style.css';
 
 export default function Main() {
