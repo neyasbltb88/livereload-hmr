@@ -1,22 +1,30 @@
 /* global console: false */
 
+interface IReporter {
+    log: Function;
+    warn: Function;
+    error: Function;
+    dir: Function;
+}
+
+const noop = () => {};
+
 /**
  * @description Репортер, используемый для вывода логов, предупреждений и ошибок вместо console.
  * @param {boolean|undefined} quiet Флаг, запрещающий выводить сообщения в консоль.
- * @returns {object} Возвращает объект репортера с методами log, warn, error.
+ * @returns {IReporter} Возвращает объект репортера с методами log, warn, error, dir.
  */
-const createReporter = (quiet) => {
-    const noop = () => {};
-
-    let reporter = {
+const createReporter = (quiet: boolean | undefined = false): IReporter => {
+    const reporter: IReporter = {
         log: noop,
         warn: noop,
-        error: noop
+        error: noop,
+        dir: noop
     };
 
     if (!quiet && window.console) {
-        const attachFunction = (reporter, name) => {
-            reporter[name] = (...args) => {
+        const attachFunction = (reporter: IReporter, name: keyof IReporter) => {
+            reporter[name] = (...args: any[]) => {
                 const f = window.console[name];
                 f.apply(window.console, args);
             };
@@ -25,9 +33,11 @@ const createReporter = (quiet) => {
         attachFunction(reporter, 'log');
         attachFunction(reporter, 'warn');
         attachFunction(reporter, 'error');
+        attachFunction(reporter, 'dir');
     }
 
     return reporter;
 };
 
 export default createReporter;
+export { createReporter, IReporter };
