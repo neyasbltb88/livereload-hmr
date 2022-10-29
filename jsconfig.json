@@ -3,7 +3,8 @@
         "baseUrl": ".",
         "paths": {
             "@/*": ["src/*"],
-            "@utils": ["src/scripts/utils/*"]
+            "@utils": ["src/scripts/utils/index"],
+            "@utils/*": ["src/scripts/utils/*"]
         }
     },
     "include": ["./src/**/*"],
