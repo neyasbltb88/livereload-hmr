@@ -2,6 +2,7 @@
     "name": "livereload-hmr",
     "version": "1.0.0",
     "description": "",
+    "author": "Neyasbltb <neyasbltb_88@mail.ru>",
     "main": "index.js",
     "scripts": {
         "dev": "cross-env NODE_ENV=development webpack-dev-server",
@@ -12,7 +13,6 @@
         "clear": "rm -r dist/ && rm stats.json"
     },
     "keywords": [],
-    "author": "",
     "license": "ISC",
     "devDependencies": {
         "@babel/core": "^7.16.7",
@@ -43,5 +43,9 @@
     },
     "browserslist": [
         "last 1 Chrome versions"
-    ]
+    ],
+    "volta": {
+        "node": "16.17.0",
+        "npm": "6.14.17"
+    }
 }
