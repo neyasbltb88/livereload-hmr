@@ -1,4 +1,4 @@
-const dom = (tag, attrs, ...children) => {
+const dom = (tag: string | Function, attrs: Record<string, any>, ...children: (HTMLElement | string | number)[]) => {
     // Custom Components will be functions
     if (typeof tag === 'function') {
         return tag();
@@ -8,11 +8,11 @@ const dom = (tag, attrs, ...children) => {
         // fragments to append multiple children to the initial node
         const fragments = document.createDocumentFragment();
         const element = document.createElement(tag);
-        children.forEach((child) => {
+        children.forEach(child => {
             if (child instanceof HTMLElement) {
                 fragments.appendChild(child);
             } else if (typeof child === 'string' || typeof child === 'number') {
-                const textnode = document.createTextNode(child);
+                const textnode = document.createTextNode(String(child));
                 fragments.appendChild(textnode);
             } else {
                 // later other things could not be HTMLElement not strings

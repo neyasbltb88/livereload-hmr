@@ -39,7 +39,7 @@ config = {
             NODE_ENV: JSON.stringify(NODE_ENV)
         }),
         new webpack.ProvidePlugin({
-            dom: [path.resolve(path.join(__dirname, 'src', 'scripts', 'utils', 'dom.js')), 'default']
+            dom: [path.resolve(path.join(__dirname, 'src', 'scripts', 'utils', 'dom')), 'default']
         }),
         new HtmlWebpackPlugin({
             title: 'JSX Test',
