@@ -7,9 +7,16 @@ body {
     position: fixed;
     width: 100%;
     bottom: 0;
-    background-color: rgba(0, 0, 0, .5);
+    background-color: rgba(0, 0, 0, 0.5);
     color: #fff;
     font-family: sans-serif;
     text-align: center;
     z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.plus {
+    margin: 0 8px;
 }
