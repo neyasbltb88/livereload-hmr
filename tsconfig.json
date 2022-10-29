@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "allowJs": true,
+        "jsx": "react-jsx",
+        "noEmit": true,
+        "sourceMap": true,
+        "strict": true,
+        "target": "es6",
+        "paths": {
+            "@/*": ["src/*"],
+            "@utils": ["src/scripts/utils/index"],
+            "@utils/*": ["src/scripts/utils/*"]
+        }
+    },
+    "include": ["src", "/src", "/src/", "src/*", "src/**/*"],
+    "exclude": [
+        "/dist",
+        ".quasar",
+        "node_modules",
+        "./node_modules/**",
+        "test",
+        ".git",
+        "dist",
+        "dist*",
+        "**/dist/*",
+        "**/node_modules/*"
+    ]
+}
