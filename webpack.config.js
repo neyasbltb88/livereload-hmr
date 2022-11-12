@@ -36,7 +36,8 @@ config = {
     devtool: DEV ? 'inline-source-map' : false,
     plugins: [
         new webpack.DefinePlugin({
-            NODE_ENV: JSON.stringify(NODE_ENV)
+            NODE_ENV: JSON.stringify(NODE_ENV),
+            'process.env.DEV': JSON.stringify(DEV)
         }),
         new webpack.ProvidePlugin({
             dom: [path.resolve(path.join(__dirname, 'src', 'scripts', 'utils', 'dom')), 'default']
